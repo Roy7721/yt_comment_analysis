@@ -55,7 +55,7 @@ Thumbs.db
 
 # Jupyter
 .ipynb_checkpoints/
-*.ipynb
+# *.ipynb  <- notebooks tracked selectively
 
 # MLflow & DagShub
 mlruns/
