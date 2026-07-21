@@ -41,8 +41,16 @@ mlruns/
 .dagshub/
 *.csv
 *.json
-data/
-models/
+# Leading slash anchors these to the repo root only.
+# Without it, "data/" and "models/" also matched src/data/ and src/models/,
+# silently excluding the pipeline source code from git.
+/data/
+/models/
+
+# Runtime logs and serialized models
+errors.log
+preprocessing_errors.log
+*.joblib
 
 # Environment variables
 .env
