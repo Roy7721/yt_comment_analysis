@@ -25,9 +25,17 @@ file_handler.setFormatter(formatter)
 logger.addHandler(console_handler)
 logger.addHandler(file_handler)
 
-# Download required NLTK data
-nltk.download('wordnet')
-nltk.download('stopwords')
+# NLTK data location.
+# Microsoft Store Python redirects writes under AppData into a sandboxed LocalCache
+# folder. NLTK's own path-security check then sees the resolved path "escape" the root
+# it expected and raises a Security Violation. So keep NLTK data in a plain folder and
+# put that folder FIRST in NLTK's search list, ahead of the AppData default.
+NLTK_DATA_DIR = os.environ.get('NLTK_DATA', r'C:\nltk_data')
+nltk.data.path.insert(0, NLTK_DATA_DIR)
+
+# Download into that same folder (no-op if already present)
+nltk.download('wordnet', download_dir=NLTK_DATA_DIR, quiet=True)
+nltk.download('stopwords', download_dir=NLTK_DATA_DIR, quiet=True)
 
 # Build these ONCE at import time rather than rebuilding them for every comment.
 # Previously both were constructed inside preprocess_comment, i.e. ~36k times.
