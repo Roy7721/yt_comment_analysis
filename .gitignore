@@ -76,3 +76,4 @@ mlruns/
 tester.ipynb
 confusion_matrix_*.png
 scripts/
+tester.py
