@@ -38,3 +38,13 @@ stages:
       - data/processed/y_train.npy
     outs:
       - models/lor_model.pkl
+
+  evaluate_model:
+    cmd: python src/models/evaluation.py
+    deps:
+      - src/models/evaluation.py
+      - models/lor_model.pkl
+      - data/processed/X_test.npz
+      - data/processed/y_test.npy
+    outs:
+      - reports/metrics.json

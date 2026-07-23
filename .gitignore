@@ -73,5 +73,6 @@ mlruns/
 .cache/
 
 *.log
-
+tester.ipynb
+confusion_matrix_*.png
 scripts/
