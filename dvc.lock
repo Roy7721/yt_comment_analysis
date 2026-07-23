@@ -5,8 +5,8 @@ stages:
     deps:
     - path: params.yaml
       hash: md5
-      md5: 8a1f6200bbb316388c965194d116c5af
-      size: 33
+      md5: 44a2837814e59b3dd836556b3d416366
+      size: 122
     - path: src/data/data_ingestion.py
       hash: md5
       md5: 1f01af85b8eb7b190d64f40c0d1ec05d
@@ -38,3 +38,39 @@ stages:
       md5: 63c7e31287447346c55fd2145ec88083.dir
       size: 5134324
       nfiles: 2
+  build_features:
+    cmd: python src/features/build_features.py
+    deps:
+    - path: data/interim/test_processed.csv
+      hash: md5
+      md5: e07d5ae356833fff14387c3a82e09e04
+      size: 1000422
+    - path: data/interim/train_processed.csv
+      hash: md5
+      md5: 321a24e0c909f9a057f43195c0d2d8c6
+      size: 4133902
+    - path: src/features/build_features.py
+      hash: md5
+      md5: 52144a50f3e16c6e92075e2dbe2c9ce1
+      size: 7660
+    outs:
+    - path: data/processed/X_test.npz
+      hash: md5
+      md5: 8a2b544d6b1c6088582378e0a1d822ad
+      size: 1272164
+    - path: data/processed/X_train.npz
+      hash: md5
+      md5: cc90483ced33ee823c834d4ba110c49c
+      size: 5326994
+    - path: data/processed/y_test.npy
+      hash: md5
+      md5: 1a44bbab55d203f444ecba7554b3dbc0
+      size: 58792
+    - path: data/processed/y_train.npy
+      hash: md5
+      md5: db18aaa9614bf1ddd619c948d2e896ab
+      size: 234760
+    - path: models/vectorizer.joblib
+      hash: md5
+      md5: ab6339af70f151222af62b67adc451fc
+      size: 379727

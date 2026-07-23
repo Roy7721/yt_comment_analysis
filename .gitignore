@@ -71,3 +71,7 @@ mlruns/
 
 # HuggingFace cache
 .cache/
+
+*.log
+
+scripts/

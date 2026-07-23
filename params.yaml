@@ -1,2 +1,12 @@
 data_ingestion:
   test_size: 0.2
+
+feature_engineering:
+  ngram_range: [1, 2]
+  max_features: 10000
+  use_spacy: true
+
+model_building:
+  C: 1.1199134843600127
+  l1_ratio: 0.9990014673384794
+  max_iter: 300

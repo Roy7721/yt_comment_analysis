@@ -16,3 +16,25 @@ stages:
       - data/raw/test.csv
     outs:
       - data/interim 
+
+  build_features:
+    cmd: python src/features/build_features.py
+    deps:
+    - src/features/build_features.py
+    - data/interim/train_processed.csv
+    - data/interim/test_processed.csv
+    outs:
+      - data/processed/X_train.npz
+      - data/processed/X_test.npz
+      - data/processed/y_train.npy
+      - data/processed/y_test.npy
+      - models/vectorizer.joblib
+
+  model_building:
+    cmd: python src/models/model_building.py
+    deps:
+      - src/models/model_building.py
+      - data/processed/X_train.npz
+      - data/processed/y_train.npy
+    outs:
+      - models/lor_model.pkl
