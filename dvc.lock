@@ -5,8 +5,8 @@ stages:
     deps:
     - path: params.yaml
       hash: md5
-      md5: 44a2837814e59b3dd836556b3d416366
-      size: 122
+      md5: b18f9aaf8f8a4b9e8cbd454376963770
+      size: 215
     - path: src/data/data_ingestion.py
       hash: md5
       md5: 1f01af85b8eb7b190d64f40c0d1ec05d
@@ -74,3 +74,23 @@ stages:
       hash: md5
       md5: ab6339af70f151222af62b67adc451fc
       size: 379727
+  model_building:
+    cmd: python src/models/model_building.py
+    deps:
+    - path: data/processed/X_train.npz
+      hash: md5
+      md5: cc90483ced33ee823c834d4ba110c49c
+      size: 5326994
+    - path: data/processed/y_train.npy
+      hash: md5
+      md5: db18aaa9614bf1ddd619c948d2e896ab
+      size: 234760
+    - path: src/models/model_building.py
+      hash: md5
+      md5: 92fb2675bb06473d8bad7d45cb53d6e0
+      size: 4319
+    outs:
+    - path: models/lor_model.pkl
+      hash: md5
+      md5: e67d24ed61404586f97b742ede9e40ed
+      size: 401977
