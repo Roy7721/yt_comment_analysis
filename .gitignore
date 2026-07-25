@@ -77,3 +77,4 @@ tester.ipynb
 confusion_matrix_*.png
 scripts/
 tester.py
+CHROME_PLUGIN_HANDOFF.md

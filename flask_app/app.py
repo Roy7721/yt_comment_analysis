@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 import io
 import matplotlib.pyplot as plt
-from wordcloud import WordCloud
+#from wordcloud import WordCloud
 import mlflow
 import numpy as np
 import joblib
@@ -25,7 +25,7 @@ import os
 # DagShub / MLflow registry
 mlflow.set_tracking_uri("https://dagshub.com/Roy7721/yt_comment_analysis.mlflow")
 
-MODEL_URI = "models:/yt_chrome_plugin_model#4@staging"
+MODEL_URI = "models:/yt_chrome_plugin_model@staging"
 # Loaded ONCE at import/startup — this call runs the pyfunc's load_context,
 # which loads spaCy + NLTK + the vectorizer + classifier and holds them in memory.
 # Every request reuses this warm object; nothing reloads per-request.
