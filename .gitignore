@@ -73,8 +73,7 @@ mlruns/
 .cache/
 
 *.log
-tester.ipynb
 confusion_matrix_*.png
-scripts/
+#scripts/
 tester.py
 CHROME_PLUGIN_HANDOFF.md
