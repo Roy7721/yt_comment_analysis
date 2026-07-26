@@ -5,8 +5,8 @@ stages:
     deps:
     - path: params.yaml
       hash: md5
-      md5: b18f9aaf8f8a4b9e8cbd454376963770
-      size: 215
+      md5: 7a4ec4eccdae0bf19800cffd0e34a421
+      size: 204
     - path: src/data/data_ingestion.py
       hash: md5
       md5: 1f01af85b8eb7b190d64f40c0d1ec05d
@@ -14,20 +14,20 @@ stages:
     outs:
     - path: data/raw
       hash: md5
-      md5: e13bcce40396cd334c8a7a334868166a.dir
-      size: 6919701
+      md5: b855e2bab4e21078d44844fee5be9da3.dir
+      size: 6882906
       nfiles: 2
   data_preprocessing:
     cmd: python src/data/data_preprocessing.py
     deps:
     - path: data/raw/test.csv
       hash: md5
-      md5: ea97ba82a4a25627bf4ffb52572484ea
-      size: 1348612
+      md5: 295b88d81555e67a857db0337244e118
+      size: 1341252
     - path: data/raw/train.csv
       hash: md5
-      md5: 1bd422dd6d135bced1d6c64a3e84a45d
-      size: 5571089
+      md5: 70faef66e6135c49f7f02db4a55e9fdd
+      size: 5541654
     - path: src/data/data_preprocessing.py
       hash: md5
       md5: dba6b94551139fe0d7cbc1145f01251a
@@ -35,33 +35,33 @@ stages:
     outs:
     - path: data/interim
       hash: md5
-      md5: 63c7e31287447346c55fd2145ec88083.dir
-      size: 5134324
+      md5: 1784bf1562e4cb0352630396bf67dd7c.dir
+      size: 5097660
       nfiles: 2
   build_features:
     cmd: python src/features/build_features.py
     deps:
     - path: data/interim/test_processed.csv
       hash: md5
-      md5: e07d5ae356833fff14387c3a82e09e04
-      size: 1000422
+      md5: 6f201bd861b063f6d6361f950dfe8451
+      size: 993088
     - path: data/interim/train_processed.csv
       hash: md5
-      md5: 321a24e0c909f9a057f43195c0d2d8c6
-      size: 4133902
+      md5: 0326d41516559f69347e3a9b7fdcf9c7
+      size: 4104572
     - path: src/features/build_features.py
       hash: md5
-      md5: 52144a50f3e16c6e92075e2dbe2c9ce1
-      size: 7660
+      md5: 220885067f65b57a67d3cfeda85140ed
+      size: 7465
     outs:
     - path: data/processed/X_test.npz
       hash: md5
-      md5: 8a2b544d6b1c6088582378e0a1d822ad
-      size: 1272164
+      md5: 3b500e23c2af7f24f132d8c8e67d51d4
+      size: 1272037
     - path: data/processed/X_train.npz
       hash: md5
-      md5: cc90483ced33ee823c834d4ba110c49c
-      size: 5326994
+      md5: 3dd1f3796f211ead2ec07c796d67c4dd
+      size: 5327957
     - path: data/processed/y_test.npy
       hash: md5
       md5: 1a44bbab55d203f444ecba7554b3dbc0
@@ -72,15 +72,15 @@ stages:
       size: 234760
     - path: models/vectorizer.joblib
       hash: md5
-      md5: ab6339af70f151222af62b67adc451fc
-      size: 379727
+      md5: 64740d159024e211a3312cc81ae8c0c3
+      size: 379788
   model_building:
     cmd: python src/models/model_building.py
     deps:
     - path: data/processed/X_train.npz
       hash: md5
-      md5: cc90483ced33ee823c834d4ba110c49c
-      size: 5326994
+      md5: 3dd1f3796f211ead2ec07c796d67c4dd
+      size: 5327957
     - path: data/processed/y_train.npy
       hash: md5
       md5: db18aaa9614bf1ddd619c948d2e896ab
@@ -92,29 +92,29 @@ stages:
     outs:
     - path: models/lor_model.pkl
       hash: md5
-      md5: e67d24ed61404586f97b742ede9e40ed
+      md5: 07e3f6e677d99e2dd5ddd8c838c04997
       size: 401977
   evaluate_model:
     cmd: python src/models/evaluation.py
     deps:
     - path: data/processed/X_test.npz
       hash: md5
-      md5: 8a2b544d6b1c6088582378e0a1d822ad
-      size: 1272164
+      md5: 3b500e23c2af7f24f132d8c8e67d51d4
+      size: 1272037
     - path: data/processed/y_test.npy
       hash: md5
       md5: 1a44bbab55d203f444ecba7554b3dbc0
       size: 58792
     - path: models/lor_model.pkl
       hash: md5
-      md5: e67d24ed61404586f97b742ede9e40ed
+      md5: 07e3f6e677d99e2dd5ddd8c838c04997
       size: 401977
     - path: src/models/evaluation.py
       hash: md5
-      md5: 8aabd0bd69088a483eb873681802af62
-      size: 10835
+      md5: 94f09dbb7a4bfc265014ff593c14854e
+      size: 10552
     outs:
     - path: reports/metrics.json
       hash: md5
-      md5: 465dc3b29e06a407bb2ab79d8a7b670e
-      size: 116
+      md5: e4422832e10f97c7cf439c8d162aea8c
+      size: 112
