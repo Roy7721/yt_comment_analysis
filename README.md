@@ -45,9 +45,9 @@ Every day, millions of people rely on YouTube to **learn** and creators rely on 
 
 ## Demo
 
-> 📹 *Demo recording / screenshots coming soon.*
+
 >
-> <!-- TODO: add a GIF of the plugin analyzing a live YouTube comment section, plus 1–2 screenshots of the popup sentiment breakdown. -->
+![Demo](demo.gif)
 
 The Chrome extension scrapes the comments on the current YouTube video, sends them to the prediction API, and renders a sentiment summary (positive / neutral / negative proportions) plus sample comments per class.
 
