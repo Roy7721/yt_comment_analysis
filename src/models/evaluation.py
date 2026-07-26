@@ -205,12 +205,12 @@ def save_model_info(run_id: str, model_uri: str, file_path_model_info: str,repor
                 'neg_recall': report['-1']['recall'],   # the class you care about most
             }
 
-        for label, metrics in report.items():
-                                    if isinstance(metrics, dict):
+        for label, label_metrics in report.items():
+                                    if isinstance(label_metrics, dict):
                                         mlflow.log_metrics({
-                                            f"test_{label}_precision": metrics['precision'],
-                                            f"test_{label}_recall": metrics['recall'],
-                                            f"test_{label}_f1-score": metrics['f1-score']
+                                            f"test_{label}_precision": label_metrics['precision'],
+                                            f"test_{label}_recall": label_metrics['recall'],
+                                            f"test_{label}_f1-score": label_metrics['f1-score']
                                         })
         # Save the dictionary as a JSON file
         with open(file_path_model_info, 'w') as file:
