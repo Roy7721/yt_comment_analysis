@@ -30,19 +30,17 @@ jobs:
                 pip install -r requirements.txt
                 python -m spacy download en_core_web_sm
 
-            - name: Debug - cred lengths
-              env:
-                MLFLOW_TRACKING_USERNAME: ${{ secrets.MLFLOW_TRACKING_USERNAME }}
-                MLFLOW_TRACKING_PASSWORD: ${{ secrets.MLFLOW_TRACKING_PASSWORD }}
-              run: |
-                echo "user length: ${#MLFLOW_TRACKING_USERNAME}"   # expect 7
-                echo "pass length: ${#MLFLOW_TRACKING_PASSWORD}"   # expect 40
-
             - name: Reproduce DVC pipeline
               env:                                         
                 MLFLOW_TRACKING_USERNAME: ${{ secrets.MLFLOW_TRACKING_USERNAME }}
                 MLFLOW_TRACKING_PASSWORD: ${{ secrets.MLFLOW_TRACKING_PASSWORD }}
               run: dvc repro
+
+            - name: Pre-promotion gate (test freshly trained model)
+              env:
+                MLFLOW_TRACKING_USERNAME: ${{ secrets.MLFLOW_TRACKING_USERNAME }}
+                MLFLOW_TRACKING_PASSWORD: ${{ secrets.MLFLOW_TRACKING_PASSWORD }}
+              run: python tests/test_model.py
 
             - name: Push DVC artifacts to DagShub
               env:
@@ -54,10 +52,6 @@ jobs:
                 dvc remote modify origin --local password "$DVC_PASS"
                 dvc push
 
-            - name: Pre-promotion gate (test freshly trained model)
-              env:
-                MLFLOW_TRACKING_USERNAME: ${{ secrets.MLFLOW_TRACKING_USERNAME }}
-                MLFLOW_TRACKING_PASSWORD: ${{ secrets.MLFLOW_TRACKING_PASSWORD }}
-              run: python tests/test_model.py
+            
 
             
