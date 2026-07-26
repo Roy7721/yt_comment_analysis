@@ -75,5 +75,5 @@ mlruns/
 *.log
 confusion_matrix_*.png
 #scripts/
-tester.py
+#tester.py
 CHROME_PLUGIN_HANDOFF.md

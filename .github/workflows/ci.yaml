@@ -31,7 +31,23 @@ jobs:
                 python -m spacy download en_core_web_sm
 
             - name: Reproduce DVC pipeline
-              env:                                         # ← creds ONLY for this step; evaluation.py logs to MLflow
+              env:                                         
                 MLFLOW_TRACKING_USERNAME: ${{ secrets.MLFLOW_TRACKING_USERNAME }}
                 MLFLOW_TRACKING_PASSWORD: ${{ secrets.MLFLOW_TRACKING_PASSWORD }}
               run: dvc repro
+
+            - name: Push DVC artifacts to remote storage
+              env:
+                 DVC_USER: ${{ secrets.MLFLOW_TRACKING_USERNAME }}
+                 DVC_PASS: ${{ secrets.MLFLOW_TRACKING_PASSWORD }}
+              run: |
+                dvc remote modify origin --local auth basic
+                dvc remote modify origin --local user "$DVC_USER"
+                dvc remote modify origin --local password "$DVC_PASS"
+                dvc push
+
+            - name: Test the registered model
+              env:
+                MLFLOW_TRACKING_USERNAME: ${{ secrets.MLFLOW_TRACKING_USERNAME }}
+                MLFLOW_TRACKING_PASSWORD: ${{ secrets.MLFLOW_TRACKING_PASSWORD }}
+              run: python tests/test_model.py
