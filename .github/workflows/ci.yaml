@@ -42,6 +42,12 @@ jobs:
                 MLFLOW_TRACKING_PASSWORD: ${{ secrets.MLFLOW_TRACKING_PASSWORD }}
               run: python tests/test_model.py
 
+            - name: Register & promote model to staging
+              env:
+                MLFLOW_TRACKING_USERNAME: ${{ secrets.MLFLOW_TRACKING_USERNAME }}
+                MLFLOW_TRACKING_PASSWORD: ${{ secrets.MLFLOW_TRACKING_PASSWORD }}
+              run: python src/models/register_model.py
+
             - name: Push DVC artifacts to DagShub
               env:
                 DVC_USER: ${{ secrets.MLFLOW_TRACKING_USERNAME }}
@@ -51,6 +57,8 @@ jobs:
                 dvc remote modify origin --local user "$DVC_USER"
                 dvc remote modify origin --local password "$DVC_PASS"
                 dvc push
+
+            
 
             
 
