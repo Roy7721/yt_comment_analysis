@@ -1,20 +1,9 @@
-from flask import Flask, request, jsonify, send_file
-from flask_cors import CORS
-import io
-import matplotlib.pyplot as plt
 
 # from wordcloud import WordCloud
 import mlflow
-import numpy as np
-import joblib
-import re
-import pandas as pd
-from nltk.corpus import stopwords
-from nltk.stem import WordNetLemmatizer
-from mlflow.tracking import MlflowClient
-import matplotlib.dates as mdates
 from dotenv import load_dotenv
-
+from flask import Flask, jsonify, request
+from flask_cors import CORS
 
 load_dotenv()
 
@@ -27,7 +16,6 @@ def home():
     return "Welcome to our flask api"
 
 
-import os
 
 # DagShub / MLflow registry
 mlflow.set_tracking_uri("https://dagshub.com/Roy7721/yt_comment_analysis.mlflow")

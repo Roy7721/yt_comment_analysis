@@ -1,12 +1,13 @@
 # src/data/data_preprocessing.py
 
-import pandas as pd
+import logging
 import os
 import re
+
 import nltk
+import pandas as pd
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
-import logging
 
 # logging configuration
 logger = logging.getLogger("data_preprocessing")

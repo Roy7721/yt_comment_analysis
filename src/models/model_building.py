@@ -1,18 +1,15 @@
 # src/model/model_building.py
 
-import numpy as np
-import pandas as pd
+import logging
 import os
 import pickle
+
+import numpy as np
 import yaml
-import logging
-import lightgbm as lgb
-from sklearn.feature_extraction.text import TfidfVectorizer
+from scipy.sparse import load_npz
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MaxAbsScaler
-import scipy
-from scipy.sparse import load_npz
 
 # logging configuration
 logger = logging.getLogger("model_building")

@@ -11,10 +11,7 @@ nltk==3.10.0
 # spaCy English model, pinned as a wheel → installs via pip, no `spacy download` step needed
 en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl
 
-# ── kept ONLY because build_features.py & model_building.py do `import lightgbm` ──
-lightgbm==4.7.0
-
-# ── Plotting (evaluation.py confusion matrix, app.py) ──
+# ── Plotting (evaluation.py confusion matrix) ──
 matplotlib==3.11.1
 seaborn==0.13.2
 

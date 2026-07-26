@@ -1,10 +1,10 @@
 # register model
 
 import json
-import pickle
-import mlflow
 import logging
 import os
+
+import mlflow
 from dotenv import load_dotenv
 
 load_dotenv()

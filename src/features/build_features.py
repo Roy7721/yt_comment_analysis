@@ -1,14 +1,13 @@
-import spacy
+import logging
+import os
+
 import joblib
 import numpy as np
 import pandas as pd
-import os
-import pickle
+import spacy
 import yaml
-import logging
-import lightgbm as lgb
+from scipy.sparse import csr_matrix, hstack, save_npz
 from sklearn.feature_extraction.text import TfidfVectorizer
-from scipy.sparse import hstack, csr_matrix, save_npz
 
 # logging configuration
 logger = logging.getLogger("build_features")

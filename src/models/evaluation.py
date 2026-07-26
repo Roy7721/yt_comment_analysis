@@ -1,24 +1,23 @@
 import json
-import pickle
-import os
-import yaml
-import numpy as np
-from scipy.sparse import load_npz
-from sklearn.metrics import classification_report, confusion_matrix
 import logging
-import matplotlib.pyplot as plt
-import seaborn as sns
-import mlflow
-import joblib
-import spacy
-import mlflow.pyfunc
+import os
+import pickle
 import re
-import pandas as pd
+
+import joblib
+import matplotlib.pyplot as plt
+import mlflow
+import mlflow.pyfunc
 import nltk
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import spacy
+from dotenv import load_dotenv
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
-from scipy.sparse import hstack, csr_matrix
-from dotenv import load_dotenv
+from scipy.sparse import csr_matrix, hstack, load_npz
+from sklearn.metrics import classification_report, confusion_matrix
 
 load_dotenv()
 
@@ -59,8 +58,8 @@ def load_data(root_dir: str):
 
 
 def load_model(model_dir):
-
-    model = pickle.load(open(model_dir, "rb"))
+    with open(model_dir, "rb") as f:
+        model = pickle.load(f)
     logger.debug("model loaded succesfully")
     return model
 
