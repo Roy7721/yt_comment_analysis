@@ -30,6 +30,14 @@ jobs:
                 pip install -r requirements.txt
                 python -m spacy download en_core_web_sm
 
+            - name: Debug - cred lengths
+              env:
+                MLFLOW_TRACKING_USERNAME: ${{ secrets.MLFLOW_TRACKING_USERNAME }}
+                MLFLOW_TRACKING_PASSWORD: ${{ secrets.MLFLOW_TRACKING_PASSWORD }}
+              run: |
+                echo "user length: ${#MLFLOW_TRACKING_USERNAME}"   # expect 7
+                echo "pass length: ${#MLFLOW_TRACKING_PASSWORD}"   # expect 40
+
             - name: Reproduce DVC pipeline
               env:                                         # ← creds ONLY for this step; evaluation.py logs to MLflow
                 MLFLOW_TRACKING_USERNAME: ${{ secrets.MLFLOW_TRACKING_USERNAME }}
