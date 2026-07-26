@@ -2,7 +2,8 @@ from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 import io
 import matplotlib.pyplot as plt
-#from wordcloud import WordCloud
+
+# from wordcloud import WordCloud
 import mlflow
 import numpy as np
 import joblib
@@ -18,11 +19,13 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app) 
+CORS(app)
 
-@app.route('/')
+
+@app.route("/")
 def home():
     return "Welcome to our flask api"
+
 
 import os
 
@@ -38,27 +41,25 @@ model = mlflow.pyfunc.load_model(MODEL_URI)
 print("Model loaded and ready.")
 
 
-@app.route('/predict', methods=['POST'])
+@app.route("/predict", methods=["POST"])
 def predict():
     data = request.json
-    comments = data.get('comments') if data else None
+    comments = data.get("comments") if data else None
 
     # Validate: must be a non-empty list of comment strings
     if not comments or not isinstance(comments, list):
-        return jsonify({"error": "Send JSON like {\"comments\": [\"text\", ...]}"}), 400
+        return jsonify({"error": 'Send JSON like {"comments": ["text", ...]}'}), 400
 
     try:
-        preds = model.predict(comments)   # pyfunc takes a raw list -> array of labels
+        preds = model.predict(comments)  # pyfunc takes a raw list -> array of labels
     except Exception as e:
         app.logger.error(f"Prediction failed: {e}")
         return jsonify({"error": str(e)}), 500
 
     # Pair each comment with its label. int(p) is REQUIRED — see note below.
-    response = [
-        {"comment": c, "sentiment": int(p)}
-        for c, p in zip(comments, preds)
-    ]
+    response = [{"comment": c, "sentiment": int(p)} for c, p in zip(comments, preds)]
     return jsonify(response)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     app.run(debug=True, use_reloader=False, port=5000)

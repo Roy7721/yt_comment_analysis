@@ -11,10 +11,11 @@ mlflow.set_tracking_uri("https://dagshub.com/Roy7721/yt_comment_analysis.mlflow"
 MODEL_INFO_PATH = "reports/model_info.json"
 METRICS_PATH = "reports/metrics.json"
 
+
 def main():
     # Load the model this run just trained — NOT the registered @staging one
     with open(MODEL_INFO_PATH) as f:
-        model_uri = json.load(f)["model_uri"]        # e.g. models:/m-728642...
+        model_uri = json.load(f)["model_uri"]  # e.g. models:/m-728642...
 
     model = mlflow.pyfunc.load_model(model_uri)
 
@@ -26,7 +27,9 @@ def main():
     preds = model.predict(comments)
 
     # Gate 1: one label per input
-    assert len(preds) == len(comments), f"expected {len(comments)} preds, got {len(preds)}"
+    assert len(preds) == len(comments), (
+        f"expected {len(comments)} preds, got {len(preds)}"
+    )
     # Gate 2: every label is a valid class
     assert all(int(p) in {-1, 0, 1} for p in preds), f"invalid labels: {list(preds)}"
 
@@ -36,8 +39,10 @@ def main():
     with open(METRICS_PATH) as f:
         metrics = json.load(f)
     ACC_FLOOR = 0.80
-    assert metrics["accuracy"] >= ACC_FLOOR, \
+    assert metrics["accuracy"] >= ACC_FLOOR, (
         f"accuracy {metrics['accuracy']:.4f} below floor {ACC_FLOOR}"
+    )
+
 
 if __name__ == "__main__":
     main()
