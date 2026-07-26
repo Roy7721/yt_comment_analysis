@@ -1,5 +1,6 @@
 import logging
 import os
+import sys
 
 import joblib
 import numpy as np
@@ -8,6 +9,13 @@ import spacy
 import yaml
 from scipy.sparse import csr_matrix, hstack, save_npz
 from sklearn.feature_extraction.text import TfidfVectorizer
+
+# inference_utils.py lives in src/models/. Add it to the path so training and the
+# inference pyfunc share ONE definition of the feature extraction.
+sys.path.insert(
+    0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "models")
+)
+from inference_utils import extract_custom_features
 
 # logging configuration
 logger = logging.getLogger("build_features")
@@ -48,7 +56,7 @@ def load_data(interim_dir: str):
         train = pd.read_csv(os.path.join(interim_dir, "train_processed.csv"))
         test = pd.read_csv(os.path.join(interim_dir, "test_processed.csv"))
 
-        # Guard: a comment reduced to empty during preprocessing has no signal,
+        #  a comment reduced to empty during preprocessing has no signal,
         # and would also crash spaCy. Drop any that slipped through.
         for name, df in [("train", train), ("test", test)]:
             before = len(df)
@@ -65,62 +73,6 @@ def load_data(interim_dir: str):
     except Exception as e:
         logger.error("Failed to load interim data: %s", e)
         raise
-
-
-# All 17 universal POS tags, in a FIXED order -> every comment yields the
-# same 17 columns in the same order (train, test, and future inference).
-UNIVERSAL_POS = [
-    "ADJ",
-    "ADP",
-    "ADV",
-    "AUX",
-    "CCONJ",
-    "DET",
-    "INTJ",
-    "NOUN",
-    "NUM",
-    "PART",
-    "PRON",
-    "PROPN",
-    "PUNCT",
-    "SCONJ",
-    "SYM",
-    "VERB",
-    "X",
-]
-
-
-def extract_custom_features(text, nlp):
-    """Turn one comment into 6 statistics + 17 POS proportions."""
-    doc = nlp(str(text))
-    word_list = [token.text for token in doc]
-
-    comment_length = len(str(text))
-    word_count = len(word_list)
-    avg_word_length = (
-        sum(len(w) for w in word_list) / word_count if word_count > 0 else 0
-    )
-    unique_word_count = len(set(word_list))
-    lexical_diversity = unique_word_count / word_count if word_count > 0 else 0
-    pos_count = len([token.pos_ for token in doc])
-
-    pos_tags = [token.pos_ for token in doc]
-    if word_count > 0:
-        pos_proportion = {
-            tag: pos_tags.count(tag) / word_count for tag in UNIVERSAL_POS
-        }
-    else:
-        pos_proportion = {tag: 0 for tag in UNIVERSAL_POS}
-
-    return {
-        "comment_length": comment_length,
-        "word_count": word_count,
-        "avg_word_length": avg_word_length,
-        "unique_word_count": unique_word_count,
-        "lexical_diversity": lexical_diversity,
-        "pos_count": pos_count,
-        **pos_proportion,
-    }
 
 
 def build_features(train, test, ngram_range, max_features, use_spacy):
@@ -197,7 +149,6 @@ def save_vectorizer(tfidf, custom_columns, models_dir):
 
 
 def main():
-    # Paths anchored to THIS FILE, not to wherever you run python from.
     ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../..")
     INTERIM_DIR = os.path.join(ROOT, "data", "interim")
     PROCESSED_DIR = os.path.join(ROOT, "data", "processed")

@@ -12,15 +12,17 @@ stages:
     cmd: python src/data/data_preprocessing.py
     deps:
       - src/data/data_preprocessing.py
+      - src/models/inference_utils.py
       - data/raw/train.csv
       - data/raw/test.csv
     outs:
-      - data/interim 
+      - data/interim
 
   build_features:
     cmd: python src/features/build_features.py
     deps:
     - src/features/build_features.py
+    - src/models/inference_utils.py
     - data/interim/train_processed.csv
     - data/interim/test_processed.csv
     outs:
@@ -43,6 +45,7 @@ stages:
     cmd: python src/models/evaluation.py
     deps:
       - src/models/evaluation.py
+      - src/models/inference_utils.py
       - models/lor_model.pkl
       - data/processed/X_test.npz
       - data/processed/y_test.npy

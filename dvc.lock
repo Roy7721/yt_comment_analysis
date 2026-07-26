@@ -5,8 +5,8 @@ stages:
     deps:
     - path: params.yaml
       hash: md5
-      md5: 7a4ec4eccdae0bf19800cffd0e34a421
-      size: 204
+      md5: b18f9aaf8f8a4b9e8cbd454376963770
+      size: 215
     - path: src/data/data_ingestion.py
       hash: md5
       md5: 02fab5cdafcbf4bbf9b72443d02605a3
@@ -14,53 +14,61 @@ stages:
     outs:
     - path: data/raw
       hash: md5
-      md5: b855e2bab4e21078d44844fee5be9da3.dir
-      size: 6882906
+      md5: e13bcce40396cd334c8a7a334868166a.dir
+      size: 6919701
       nfiles: 2
   data_preprocessing:
     cmd: python src/data/data_preprocessing.py
     deps:
     - path: data/raw/test.csv
       hash: md5
-      md5: 295b88d81555e67a857db0337244e118
-      size: 1341252
+      md5: ea97ba82a4a25627bf4ffb52572484ea
+      size: 1348612
     - path: data/raw/train.csv
       hash: md5
-      md5: 70faef66e6135c49f7f02db4a55e9fdd
-      size: 5541654
+      md5: 1bd422dd6d135bced1d6c64a3e84a45d
+      size: 5571089
     - path: src/data/data_preprocessing.py
       hash: md5
-      md5: 1ad8bf96960bf6df5f4df32611a85b70
-      size: 5843
+      md5: 5837866b5883cd5c5f3610baf2ac38ab
+      size: 4458
+    - path: src/models/inference_utils.py
+      hash: md5
+      md5: bf7ddef921f759b84a0843bebdc5e042
+      size: 2734
     outs:
     - path: data/interim
       hash: md5
-      md5: 1784bf1562e4cb0352630396bf67dd7c.dir
-      size: 5097660
+      md5: 63c7e31287447346c55fd2145ec88083.dir
+      size: 5134324
       nfiles: 2
   build_features:
     cmd: python src/features/build_features.py
     deps:
     - path: data/interim/test_processed.csv
       hash: md5
-      md5: 6f201bd861b063f6d6361f950dfe8451
-      size: 993088
+      md5: e07d5ae356833fff14387c3a82e09e04
+      size: 1000422
     - path: data/interim/train_processed.csv
       hash: md5
-      md5: 0326d41516559f69347e3a9b7fdcf9c7
-      size: 4104572
+      md5: 321a24e0c909f9a057f43195c0d2d8c6
+      size: 4133902
     - path: src/features/build_features.py
       hash: md5
-      md5: 9a00f4e980b5417b126d285466ce9f94
-      size: 7588
+      md5: 02a1824b1a3b430c304a4143a6b4239e
+      size: 6555
+    - path: src/models/inference_utils.py
+      hash: md5
+      md5: bf7ddef921f759b84a0843bebdc5e042
+      size: 2734
     outs:
     - path: data/processed/X_test.npz
       hash: md5
-      md5: 11200a3352b0a49e99b1dacdfb7df7ec
+      md5: 8a2b544d6b1c6088582378e0a1d822ad
       size: 1272164
     - path: data/processed/X_train.npz
       hash: md5
-      md5: 6b0a6afee666806919081f59fd85065b
+      md5: cc90483ced33ee823c834d4ba110c49c
       size: 5326994
     - path: data/processed/y_test.npy
       hash: md5
@@ -72,14 +80,14 @@ stages:
       size: 234760
     - path: models/vectorizer.joblib
       hash: md5
-      md5: 1d42f91173c4f849ade40dd5fb30a72b
+      md5: 0d051cc5b5154dfe43bc74168c22befb
       size: 379727
   model_building:
     cmd: python src/models/model_building.py
     deps:
     - path: data/processed/X_train.npz
       hash: md5
-      md5: 6b0a6afee666806919081f59fd85065b
+      md5: cc90483ced33ee823c834d4ba110c49c
       size: 5326994
     - path: data/processed/y_train.npy
       hash: md5
@@ -92,14 +100,14 @@ stages:
     outs:
     - path: models/lor_model.pkl
       hash: md5
-      md5: cde26414f1a3a16d64fff6ac7c4a3412
+      md5: e67d24ed61404586f97b742ede9e40ed
       size: 401977
   evaluate_model:
     cmd: python src/models/evaluation.py
     deps:
     - path: data/processed/X_test.npz
       hash: md5
-      md5: 11200a3352b0a49e99b1dacdfb7df7ec
+      md5: 8a2b544d6b1c6088582378e0a1d822ad
       size: 1272164
     - path: data/processed/y_test.npy
       hash: md5
@@ -107,14 +115,18 @@ stages:
       size: 58792
     - path: models/lor_model.pkl
       hash: md5
-      md5: cde26414f1a3a16d64fff6ac7c4a3412
+      md5: e67d24ed61404586f97b742ede9e40ed
       size: 401977
     - path: src/models/evaluation.py
       hash: md5
-      md5: fa9e69d7b526b05533953fcbe2257eba
-      size: 10820
+      md5: 8feaf0ebf8484d69e2883aac98d746ad
+      size: 8381
+    - path: src/models/inference_utils.py
+      hash: md5
+      md5: bf7ddef921f759b84a0843bebdc5e042
+      size: 2734
     outs:
     - path: reports/metrics.json
       hash: md5
-      md5: a51260f2a17d393f22f7423cbc4c7afc
-      size: 112
+      md5: 465dc3b29e06a407bb2ab79d8a7b670e
+      size: 116

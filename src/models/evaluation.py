@@ -2,20 +2,16 @@ import json
 import logging
 import os
 import pickle
-import re
 
 import joblib
 import matplotlib.pyplot as plt
 import mlflow
 import mlflow.pyfunc
-import nltk
 import numpy as np
 import pandas as pd
 import seaborn as sns
 import spacy
 from dotenv import load_dotenv
-from nltk.corpus import stopwords
-from nltk.stem import WordNetLemmatizer
 from scipy.sparse import csr_matrix, hstack, load_npz
 from sklearn.metrics import classification_report, confusion_matrix
 
@@ -66,10 +62,11 @@ def load_model(model_dir):
 
 class SentimentModel(mlflow.pyfunc.PythonModel):
     def load_context(self, context):
-        # context.artifacts holds the LOCAL paths MLflow copied our files to.
-        # The keys ('vectorizer', 'model') are whatever we name them in log_model later.
+        import inference_utils
 
-        # vectorizer.joblib is a DICT: {'tfidf': ..., 'custom_columns': [...]}
+        self._preprocess = inference_utils.preprocess_comment
+        self._extract = inference_utils.extract_custom_features
+
         bundle = joblib.load(context.artifacts["vectorizer"])
         self.tfidf = bundle["tfidf"]
         self.custom_columns = bundle["custom_columns"]
@@ -78,82 +75,11 @@ class SentimentModel(mlflow.pyfunc.PythonModel):
         with open(context.artifacts["model"], "rb") as f:
             self.model = pickle.load(f)
 
-        # spaCy loaded ONCE here, not per-comment (it's the slow part)
+        # (it's the slow part).
         self.nlp = spacy.load("en_core_web_sm")
-        # Same Store-Python sandbox fix as data_preprocessing.py: keep NLTK data in a
-        # plain folder and search it FIRST, else nltk's path-security check rejects the
-        # sandbox-redirected AppData path.
-        nltk_dir = os.environ.get("NLTK_DATA", r"C:\nltk_data")
-        nltk.data.path.insert(0, nltk_dir)
-        nltk.download("stopwords", download_dir=nltk_dir, quiet=True)
-        nltk.download("wordnet", download_dir=nltk_dir, quiet=True)
-        # nltk.download("stopwords", quiet=True)
-        # nltk.download("wordnet", quiet=True)
-        self.stop_words = set(stopwords.words("english")) - {
-            "not",
-            "but",
-            "however",
-            "no",
-            "yet",
-        }
-        self.lemmatizer = WordNetLemmatizer()
-
-        self.UNIVERSAL_POS = [
-            "ADJ",
-            "ADP",
-            "ADV",
-            "AUX",
-            "CCONJ",
-            "DET",
-            "INTJ",
-            "NOUN",
-            "NUM",
-            "PART",
-            "PRON",
-            "PROPN",
-            "PUNCT",
-            "SCONJ",
-            "SYM",
-            "VERB",
-            "X",
-        ]
-
-    def _preprocess(self, comment):
-        """Identical to data_preprocessing.preprocess_comment — must match training."""
-        comment = comment.lower().strip()
-        comment = re.sub(r"\n", " ", comment)
-        comment = re.sub(r"[^A-Za-z0-9\s!?.,]", "", comment)
-        comment = " ".join(w for w in comment.split() if w not in self.stop_words)
-        comment = " ".join(self.lemmatizer.lemmatize(w) for w in comment.split())
-        return comment
-
-    def _extract_features(self, text):
-        """Identical to build_features.extract_custom_features, using self.nlp."""
-        doc = self.nlp(str(text))
-        word_list = [t.text for t in doc]
-        word_count = len(word_list)
-        pos_tags = [t.pos_ for t in doc]
-        if word_count > 0:
-            pos_proportion = {
-                tag: pos_tags.count(tag) / word_count for tag in self.UNIVERSAL_POS
-            }
-        else:
-            pos_proportion = {tag: 0 for tag in self.UNIVERSAL_POS}
-        return {
-            "comment_length": len(str(text)),
-            "word_count": word_count,
-            "avg_word_length": sum(len(w) for w in word_list) / word_count
-            if word_count > 0
-            else 0,
-            "unique_word_count": len(set(word_list)),
-            "lexical_diversity": len(set(word_list)) / word_count
-            if word_count > 0
-            else 0,
-            "pos_count": len(pos_tags),
-            **pos_proportion,
-        }
-
-    # 4. predict — the actual chain
+        inference_utils.setup_nltk()
+        self.stop_words = inference_utils.get_stop_words()
+        self.lemmatizer = inference_utils.get_lemmatizer()
 
     def predict(self, context, model_input):
         # The Chrome plugin sends comments as JSON; MLflow serving hands them to us
@@ -163,12 +89,14 @@ class SentimentModel(mlflow.pyfunc.PythonModel):
         else:
             comments = [str(c) for c in model_input]
 
-        # SAME order as training: preprocess FIRST, then tfidf + custom features on the clean text
-        cleaned = [self._preprocess(c) for c in comments]
+        # SAME order as training: preprocess FIRST, then tfidf + custom features.
+        cleaned = [
+            self._preprocess(c, self.stop_words, self.lemmatizer) for c in comments
+        ]
 
         tfidf_part = self.tfidf.transform(cleaned)
 
-        feats = pd.DataFrame([self._extract_features(c) for c in cleaned])
+        feats = pd.DataFrame([self._extract(c, self.nlp) for c in cleaned])
         feats = feats.reindex(
             columns=self.custom_columns, fill_value=0
         )  # lock column order
@@ -263,12 +191,7 @@ def main():
             root_dir = get_root_directory()
             MODELS_DIR = os.path.join(os.path.join(root_dir, "models"), "lor_model.pkl")
 
-            # params = load_params(os.path.join(root_dir, 'params.yaml'))
-
             X_test, y_test = load_data(root_dir=root_dir)
-
-            # Log the vectorizer as an artifact
-            # mlflow.log_artifact(os.path.join(os.path.join(root_dir, 'models'), 'vectorizer.joblib'))
 
             report, cm = predict_and_report(
                 x_test=X_test, y_test=y_test, model_dir=MODELS_DIR
@@ -282,6 +205,10 @@ def main():
                     "vectorizer": os.path.join(root_dir, "models", "vectorizer.joblib"),
                     "model": os.path.join(root_dir, "models", "lor_model.pkl"),
                 },
+                # Ship the shared preprocessing/feature module with the model, so the
+                code_paths=[
+                    os.path.join(root_dir, "src", "models", "inference_utils.py")
+                ],
             )
 
             print("model_uri ->", logged_model.model_uri)

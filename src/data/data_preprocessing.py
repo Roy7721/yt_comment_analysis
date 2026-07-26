@@ -2,12 +2,9 @@
 
 import logging
 import os
-import re
+import sys
 
-import nltk
 import pandas as pd
-from nltk.corpus import stopwords
-from nltk.stem import WordNetLemmatizer
 
 # logging configuration
 logger = logging.getLogger("data_preprocessing")
@@ -26,47 +23,30 @@ file_handler.setFormatter(formatter)
 logger.addHandler(console_handler)
 logger.addHandler(file_handler)
 
-# NLTK data location.
-# Microsoft Store Python redirects writes under AppData into a sandboxed LocalCache
-# folder. NLTK's own path-security check then sees the resolved path "escape" the root
-# it expected and raises a Security Violation. So keep NLTK data in a plain folder and
-# put that folder FIRST in NLTK's search list, ahead of the AppData default.
-NLTK_DATA_DIR = os.environ.get("NLTK_DATA", r"C:\nltk_data")
-nltk.data.path.insert(0, NLTK_DATA_DIR)
+# inference_utils.py lives in src/models/. Add it to the path so this standalone
+# DVC-stage script shares ONE definition of the cleaning logic with the inference
+# pyfunc (prevents train/serve skew).
+sys.path.insert(
+    0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "models")
+)
+from inference_utils import (
+    get_lemmatizer,
+    get_stop_words,
+    setup_nltk,
+)
+from inference_utils import (
+    preprocess_comment as _shared_preprocess,
+)
 
-# Download into that same folder (no-op if already present)
-nltk.download("wordnet", download_dir=NLTK_DATA_DIR, quiet=True)
-nltk.download("stopwords", download_dir=NLTK_DATA_DIR, quiet=True)
-
-# Build these ONCE at import time rather than rebuilding them for every comment.
-# Previously both were constructed inside preprocess_comment, i.e. ~36k times.
-STOP_WORDS = set(stopwords.words("english")) - {"not", "but", "however", "no", "yet"}
-LEMMATIZER = WordNetLemmatizer()
+setup_nltk()  # point NLTK at a writable dir + ensure corpora exist
+STOP_WORDS = get_stop_words()
+LEMMATIZER = get_lemmatizer()
 
 
-# Define the preprocessing function
 def preprocess_comment(comment):
-    """Apply preprocessing transformations to a comment."""
+    """Thin wrapper around the shared cleaner; keeps the per-row safety net."""
     try:
-        # Convert to lowercase
-        comment = comment.lower()
-
-        # Remove trailing and leading whitespaces
-        comment = comment.strip()
-
-        # Remove newline characters
-        comment = re.sub(r"\n", " ", comment)
-
-        # Remove non-alphanumeric characters, except punctuation
-        comment = re.sub(r"[^A-Za-z0-9\s!?.,]", "", comment)
-
-        # Remove stopwords but retain important ones for sentiment analysis
-        comment = " ".join([word for word in comment.split() if word not in STOP_WORDS])
-
-        # Lemmatize the words
-        comment = " ".join([LEMMATIZER.lemmatize(word) for word in comment.split()])
-
-        return comment
+        return _shared_preprocess(comment, STOP_WORDS, LEMMATIZER)
     except Exception as e:
         logger.error(f"Error in preprocessing comment: {e}")
         return comment
@@ -84,13 +64,7 @@ def normalize_text(df):
 
 
 def drop_empty_comments(df: pd.DataFrame, split_name: str) -> pd.DataFrame:
-    """Drop rows whose comment became empty during preprocessing.
-
-    Stripping symbols and stopwords can reduce a comment to an empty string. An empty
-    string is NOT null in memory, so isnull() reports zero here - but to_csv writes it
-    as a blank field and read_csv reads that blank back as NaN. That round-trip is where
-    surprise null values downstream come from, so drop these rows before saving.
-    """
+    """Drop rows whose comment became empty during preprocessing."""
     try:
         before = len(df)
         df = df[df["clean_comment"].notna()]

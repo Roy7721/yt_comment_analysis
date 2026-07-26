@@ -1,4 +1,3 @@
-
 # from wordcloud import WordCloud
 import mlflow
 from dotenv import load_dotenv
@@ -14,7 +13,6 @@ CORS(app)
 @app.route("/")
 def home():
     return "Welcome to our flask api"
-
 
 
 # DagShub / MLflow registry
