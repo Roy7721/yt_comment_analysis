@@ -47,7 +47,7 @@ Every day, millions of people rely on YouTube to **learn** and creators rely on 
 
 
 >
-![Demo](demo.gif)
+![Demo](assets/demo.gif)
 
 The Chrome extension scrapes the comments on the current YouTube video, sends them to the prediction API, and renders a sentiment summary (positive / neutral / negative proportions) plus sample comments per class.
 
