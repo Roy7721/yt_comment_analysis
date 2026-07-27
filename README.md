@@ -9,7 +9,7 @@
 
 > A 3-class sentiment classifier (**negative · neutral · positive**) for YouTube comments, served through a Flask API and surfaced live in a Chrome extension — wrapped in a full, reproducible **MLOps pipeline** (DVC + MLflow + CI/CD + Docker).
 
-This is my **first end-to-end portfolio project**. The goal was not just to train a model, but to *engineer the whole system around it* the way a real team would: versioned data, tracked experiments, a reproducible pipeline, a gated CI/CD workflow, a model registry, a containerized API, and a browser client that a real user can actually click.
+This is one of my end-to-end projects, where the goal wasn't just to train a model but to engineer the entire system around it the way a real team would — versioned data, tracked experiments, a reproducible pipeline, a gated CI/CD workflow, a model registry, a containerized API, and a browser client a real user can actually click.
 
 ---
 
@@ -123,7 +123,7 @@ Reaching the final model was an **iterative, experiment-driven process**, not a 
 **What was explored:**
 
 - **Feature representations** — Bag-of-Words vs. **TF-IDF**, and n-gram ranges (unigram, **bigram**, trigram) to capture short negation/intensifier phrases like *"not good"*.
-- **~8–9 candidate algorithms** — Logistic Regression, Naive Bayes, Linear SVM, Random Forest, Gradient-Boosted trees, KNN, and others — compared on the same splits.
+- **7 candidate algorithms** — including Logistic Regression, Naive Bayes, Linear SVM, Random Forest, Gradient-Boosted trees, and KNN — compared on the same splits.
 - **Class imbalance** — the neutral/negative/positive classes are uneven; explored class weighting and resampling strategies.
 - **Custom linguistic features** — beyond TF-IDF, engineered **6 text statistics** (length, word count, avg. word length, unique-word count, lexical diversity, POS count) plus **17 spaCy universal-POS proportions**, fused with the sparse TF-IDF matrix.
 - **Hyperparameter tuning** — optimized the winning model with **Optuna**.
@@ -226,11 +226,15 @@ python -m venv venv
 pip install -r requirements.txt
 ```
 
-**2. Configure credentials** — create a `.env` (never committed):
+**2. Configure credentials** — the pipeline logs experiments and models to a DagShub-hosted MLflow server, so training needs credentials. Create a `.env` in the project root:
 ```env
-MLFLOW_TRACKING_USERNAME=<your-dagshub-username>
-MLFLOW_TRACKING_PASSWORD=<your-dagshub-token>
+MLFLOW_TRACKING_USERNAME=<username>
+MLFLOW_TRACKING_PASSWORD=<token>
 ```
+
+> **Reproducing the full pipeline:** data ingestion pulls from a public URL, so it works out of the box. But `dvc repro` also *logs* to a DagShub MLflow server. To run it end-to-end, either:
+> - point it at your own DagShub/MLflow — update the tracking URI in `src/models/evaluation.py` & `src/models/register_model.py` and use your own credentials, or
+> - **[email me](mailto:ranaroy4007@gmail.com)** and I'll set up temporary access.
 
 **3. Reproduce the full pipeline**
 ```bash
@@ -315,8 +319,8 @@ Honest accounting of where this project stands today:
 
 ## Author & License
 
-**Author:** Roy ([@Roy7721](https://github.com/Roy7721))
-<!-- TODO: add your full name + LinkedIn / contact if you'd like recruiters to reach you. -->
+**Author:** Rana Roy
+📧 [ranaroy4007@gmail.com](mailto:ranaroy4007@gmail.com) · 💼 [LinkedIn](https://www.linkedin.com/in/rana-roy-4771b5282/) · 🐙 [GitHub](https://github.com/Roy7721)
 
 Released under the **MIT License** — see [LICENSE](LICENSE).
 
