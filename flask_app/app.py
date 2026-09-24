@@ -53,18 +53,24 @@ DEMO_PAGE = """<!doctype html>
      this page is here so you can test the classifier itself without installing anything.
      One comment per line.</p>
 
-  <textarea id="input">this video changed my life, absolutely brilliant
-worst tutorial I have ever watched
-it was okay, nothing special
-great content but the audio is unbearable</textarea>
+  <textarea id="input">this is exactly what I needed, brilliant explanation
+honestly the worst audio I have heard on a tutorial
+what version are you running here
+boring and too long
+the code is at 4:32 for anyone looking</textarea>
   <button id="go">Analyse</button>
   <div id="status"></div>
   <div id="out"></div>
 
   <footer>
-    TF-IDF + elastic-net logistic regression, 0.885 accuracy / 0.875 macro F1.
-    Trained on Reddit comments, applied to YouTube - so real-world accuracy runs
-    below the test score.<br>
+    <strong>What this project demonstrates:</strong> a 5-stage reproducible DVC pipeline,
+    MLflow model registry with an accuracy gate blocking promotion below 0.80, containerised
+    serving, and GitHub Actions deploying to Azure pinned to the commit SHA.<br><br>
+    The model is the smallest part, on purpose: TF-IDF + logistic regression, picked for fast
+    inference and a small footprint inside a browser plugin. Trained on Reddit comments and
+    applied to YouTube, so it reads explicit sentiment well and understated negativity less
+    well. Swapping in a transformer is a training-data and compute question, not an
+    architecture change - the pipeline around it is unchanged.<br><br>
     <a href="https://github.com/Roy7721/yt_comment_analysis">Pipeline &amp; training repo</a> &middot;
     <a href="https://github.com/Roy7721/Chrome_plugin">Chrome extension</a>
   </footer>
