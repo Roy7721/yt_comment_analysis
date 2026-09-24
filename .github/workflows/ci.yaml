@@ -91,6 +91,19 @@ jobs:
                 tags: |
                   ${{ secrets.DOCKERHUB_USERNAME }}/yt-sentiment-api:latest
                   ${{ secrets.DOCKERHUB_USERNAME }}/yt-sentiment-api:${{ github.sha }}
+
+            - name: Azure login
+              uses: azure/login@v2
+              with:
+                creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+            - name: Deploy to Azure Container Apps
+              run: |
+                az extension add --name containerapp --upgrade
+                az containerapp update \
+                  --name yt-sentiment-api \
+                  --resource-group ml-apps \
+                  --image ${{ secrets.DOCKERHUB_USERNAME }}/yt-sentiment-api:${{ github.sha }}
             
 
             
