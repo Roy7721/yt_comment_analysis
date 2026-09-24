@@ -6,10 +6,32 @@
 ![Docker Hub](https://img.shields.io/badge/docker-ranaroy01%2Fyt--sentiment--api-2496ED.svg)
 ![Code style](https://img.shields.io/badge/lint-ruff-black.svg)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey.svg)
+[![Live API](https://img.shields.io/badge/live-Azure%20Container%20Apps-0078D4.svg)](https://yt-sentiment-api.ashysmoke-d4f578eb.koreacentral.azurecontainerapps.io)
 
 > A 3-class sentiment classifier (**negative · neutral · positive**) for YouTube comments, served through a Flask API and surfaced live in a Chrome extension — wrapped in a full, reproducible **MLOps pipeline** (DVC + MLflow + CI/CD + Docker).
 
 This is one of my end-to-end projects, where the goal wasn't just to train a model but to engineer the entire system around it the way a real team would — versioned data, tracked experiments, a reproducible pipeline, a gated CI/CD workflow, a model registry, a containerized API, and a browser client a real user can actually click.
+
+---
+
+## 🟢 Live API
+
+**<https://yt-sentiment-api.ashysmoke-d4f578eb.koreacentral.azurecontainerapps.io>**
+
+Try it without cloning anything:
+
+```bash
+curl -X POST https://yt-sentiment-api.ashysmoke-d4f578eb.koreacentral.azurecontainerapps.io/predict \
+  -H "Content-Type: application/json" \
+  -d '{"comments":["this tutorial is amazing, thank you","worst video ever"]}'
+```
+
+```json
+[{"comment":"this tutorial is amazing, thank you","sentiment":1},
+ {"comment":"worst video ever","sentiment":-1}]
+```
+
+> Hosted on Azure Container Apps and deployed automatically by CI on every green pipeline run. It scales to zero when idle, so the first request after a quiet period takes a few seconds to wake.
 
 ---
 
@@ -72,7 +94,7 @@ flowchart TB
         direction LR
         P["git push"] --> R["dvc repro"] --> G{"Quality gate<br/>valid labels &<br/>accuracy ≥ 0.80"}
         G -->|pass| PR["register + promote<br/>to @staging"]
-        G -->|pass| DK["build & push<br/>Docker image"]
+        G -->|pass| DK["build & push<br/>Docker image"] --> AZ["deploy to<br/>Azure Container Apps"]
         G -->|fail| X["stop — nothing ships"]
     end
 
@@ -110,6 +132,7 @@ flowchart TB
 | **Browser client** | Chrome Extension API, Manifest V3, content/background scripts |
 | **Containerization** | Docker, Docker Hub |
 | **CI/CD** | GitHub Actions |
+| **Cloud hosting** | Azure Container Apps (scale-to-zero, deployed from CI) |
 | **Testing / QA** | Postman (manual API testing), pytest-style model gate, ruff (lint + format) |
 | **Config / secrets** | python-dotenv, GitHub Actions Secrets |
 | **Version control** | Git, GitHub |
@@ -159,6 +182,7 @@ The project was built in the same order a production ML system would be:
 9. **Setting up the CI/CD pipeline** — GitHub Actions.
 10. **Testing** — an automated pre-promotion model gate + manual API testing (Postman).
 11. **Containerizing** — building the Docker image and publishing it to Docker Hub.
+12. **Deploying** — shipping the image to Azure Container Apps from CI, behind a public HTTPS URL.
 
 ---
 
@@ -175,12 +199,12 @@ This is the heart of the project — the parts that make it an *engineering* pro
 **⚙️ Gated CI/CD (GitHub Actions).** On every push to `master`:
 
 ```
-dvc repro  →  quality gate  →  register + promote  →  dvc push  →  build & push Docker image
+dvc repro  →  quality gate  →  register + promote  →  dvc push  →  build & push image  →  deploy to Azure
 ```
 
 The **quality gate** re-tests the freshly trained model (valid labels + **accuracy ≥ 0.80**) and *blocks promotion* if it regresses — so a bad model never reaches the plugin. The pipeline also auto-syncs `dvc.lock` back to the repo (GitOps).
 
-**📦 Containerized serving (Docker).** The Flask API is packaged into a Docker image published to Docker Hub (`ranaroy01/yt-sentiment-api`), ready to run anywhere.
+**📦 Containerized serving (Docker) + continuous deployment.** The Flask API is packaged into a Docker image published to Docker Hub (`ranaroy01/yt-sentiment-api`) and **deployed automatically to Azure Container Apps on every green pipeline run**. Each deployment is pinned to the commit SHA rather than `latest`, so any running instance traces back to an exact commit.
 
 ---
 
@@ -188,7 +212,7 @@ The **quality gate** re-tests the freshly trained model (valid labels + **accura
 
 ```
 yt_comment_analysis/
-├── .github/workflows/ci.yaml     # CI/CD: repro → gate → register → dockerize
+├── .github/workflows/ci.yaml     # CI/CD: repro → gate → register → dockerize → deploy
 ├── src/
 │   ├── data/
 │   │   ├── data_ingestion.py     # fetch + split raw data
@@ -293,7 +317,7 @@ Honest accounting of where this project stands today:
 - **Weak neutral / negative boundary.** Negative-class recall (~0.77) is the model's soft spot; subtle or mixed comments get misread. This is partly a **data ceiling**, not just a model flaw.
 - **English only** — non-English comments are not handled.
 - **No sarcasm/emoji understanding** — a fundamental limit of a linear bag-of-features model.
-- **Deployment is local for now.** The API runs locally and as a Docker container, but is **not yet hosted on an always-on cloud URL** (free-tier hosts now require billing verification, and AWS access was unavailable at build time). The image is built and published, ready to deploy the moment resources are available.
+- **Cold start on the hosted API.** The container scales to zero when idle to stay inside the free tier, so the first request after a quiet period takes a few seconds while the model loads from the registry. Subsequent requests are immediate.
 
 ---
 
@@ -302,7 +326,7 @@ Honest accounting of where this project stands today:
 - **Deep learning** — fine-tune a transformer (e.g., DistilBERT/RoBERTa) for better context, sarcasm, and multilingual handling.
 - **Real YouTube training data** — collect and label domain-specific comments to kill the domain shift.
 - **Multilingual support.**
-- **Cloud deployment** — ship the existing Docker image to a managed host (AWS ECS/App Runner or a PaaS) and point the plugin at a public HTTPS URL.
+- **Eliminate the cold start** — bake the model into the image at build time so startup doesn't depend on the registry being reachable.
 - **Harden the CI gate** — per-class thresholds, a held-out canary set, and drift monitoring.
 - **Spam/bot filtering & emoji handling** in preprocessing.
 - **Grow it with a team** — the architecture is intentionally modular so contributors can own the model, API, or plugin independently.
