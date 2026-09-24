@@ -80,7 +80,7 @@ stages:
       size: 234760
     - path: models/vectorizer.joblib
       hash: md5
-      md5: 6177b1b8a2627e28b9604759235900ae
+      md5: b0acd8cc577b3de9727a6fec920a5753
       size: 379727
   model_building:
     cmd: python src/models/model_building.py
